@@ -97,7 +97,7 @@ document.getElementById('name-form').addEventListener('submit',event=>{
  const name=input.value.trim();
  if(!name){input.setCustomValidity('이름을 입력해주세요.');input.reportValidity();return;}
  input.setCustomValidity('');
- document.getElementById('recipient-greeting').textContent=name+'님, 꽃이 도착했습니다.';
+ document.getElementById('recipient-greeting').textContent=name+'님 꽃이 도착했습니다.';
  document.getElementById('name-screen').hidden=true;
  document.getElementById('question').hidden=false;
  document.getElementById('question-title').focus({preventScroll:true});
