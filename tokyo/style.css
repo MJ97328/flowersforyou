@@ -18,7 +18,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sky);outline-of
 .topbar{position:fixed;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;gap:10px;align-items:center;z-index:30;pointer-events:none}
 .topbar>*{pointer-events:auto}
 .brand{width:48px;height:48px;flex:none;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:26px;box-shadow:var(--shadow);border:3px solid var(--pink-soft)}
-.search{position:relative;flex:1;display:flex;background:#fff;border-radius:999px;box-shadow:var(--shadow);border:3px solid var(--pink-soft);max-width:560px}
+.search{position:relative;flex:1;min-width:0;display:flex;background:#fff;border-radius:999px;box-shadow:var(--shadow);border:3px solid var(--pink-soft);max-width:560px}
 .search input{flex:1;min-width:0;border:0;background:transparent;padding:12px 6px 12px 18px;font-size:17px;outline:none}
 .search input::placeholder{color:#c9aab6}
 .icon-btn{padding:0 16px;font-size:20px}

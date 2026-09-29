@@ -379,6 +379,7 @@ function selectPlace(place, pan = false) {
   $('place-name').textContent = place.name;
   $('place-address').textContent = place.address;
   $('place-card').hidden = false;
+  if ($('sheet').dataset.state === 'full') openSheet('half');
 }
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => {
   $(b.dataset.close).hidden = true; placeMarker?.remove(); placeMarker = null;
