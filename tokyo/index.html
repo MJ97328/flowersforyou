@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffe4ec">
+<title>도쿄 여행 지도</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23ffd6e2'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='38'%3E%F0%9F%97%BC%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="map" aria-label="도쿄 지도"></div>
+
+<!-- 상단 검색 -->
+<header class="topbar">
+  <div class="brand" aria-hidden="true">🗼</div>
+  <form id="search-form" class="search" role="search" autocomplete="off">
+    <input id="search-input" type="search" placeholder="도쿄에서 어디 갈까? 🍡" aria-label="장소 검색" aria-autocomplete="list" aria-controls="suggestions">
+    <button type="submit" class="icon-btn" aria-label="검색">🔍</button>
+    <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+  </form>
+</header>
+
+<!-- 지도 위 버튼 -->
+<div class="fabs">
+  <button id="locate-btn" class="fab" type="button" aria-label="내 위치로 이동" title="내 위치">📍</button>
+  <button id="tokyo-btn" class="fab" type="button" aria-label="도쿄역으로 돌아가기" title="도쿄 중심">🗾</button>
+</div>
+
+<!-- 장소 카드 -->
+<section id="place-card" class="place-card" hidden aria-live="polite">
+  <button class="close-x" type="button" data-close="place-card" aria-label="닫기">✕</button>
+  <h2 id="place-name"></h2>
+  <p id="place-address" class="muted"></p>
+  <div class="chip-row">
+    <button id="set-origin" class="chip" type="button">🐣 여기서 출발</button>
+    <button id="set-dest" class="chip" type="button">🏁 여기로 도착</button>
+    <button id="add-to-day" class="chip pink" type="button">📒 일정에 추가</button>
+  </div>
+</section>
+
+<!-- 하단 시트 -->
+<section id="sheet" class="sheet" data-state="half">
+  <button id="sheet-handle" class="sheet-handle" type="button" aria-label="패널 크기 바꾸기"><span></span></button>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" role="tab" aria-selected="true" data-tab="route">🚃 길찾기</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="plan">📒 일정표</button>
+  </nav>
+
+  <!-- 길찾기 -->
+  <div id="tab-route" class="tab-body" role="tabpanel">
+    <div class="route-inputs">
+      <div class="route-field">
+        <span class="dot start">출발</span>
+        <button id="origin-field" class="field" type="button">📍 내 위치</button>
+        <button id="origin-me" class="mini" type="button" title="내 위치로 설정" aria-label="출발지를 내 위치로">🙋</button>
+      </div>
+      <button id="swap-btn" class="swap" type="button" aria-label="출발지와 도착지 바꾸기">⇅</button>
+      <div class="route-field">
+        <span class="dot end">도착</span>
+        <button id="dest-field" class="field empty" type="button">검색하거나 지도를 눌러주세요</button>
+        <button id="dest-me" class="mini" type="button" title="내 위치로 설정" aria-label="도착지를 내 위치로">🙋</button>
+      </div>
+    </div>
+    <p class="hint">💡 지도를 꾹 누르거나 클릭하면 그 지점을 출발/도착으로 고를 수 있어요.</p>
+    <div class="modes" role="radiogroup" aria-label="이동 수단">
+      <label><input type="radio" name="mode" value="TRANSIT" checked><span>🚇 대중교통</span></label>
+      <label><input type="radio" name="mode" value="WALKING"><span>🚶 도보</span></label>
+      <label><input type="radio" name="mode" value="DRIVING"><span>🚕 자동차</span></label>
+    </div>
+    <div class="when">
+      <label for="depart-at">🕒 출발 시간</label>
+      <input id="depart-at" type="datetime-local">
+      <button id="depart-now" class="mini text" type="button">지금</button>
+    </div>
+    <button id="route-btn" class="big-btn" type="button">길 알려줘! ✨</button>
+    <div id="route-result" class="route-result"></div>
+  </div>
+
+  <!-- 일정표 -->
+  <div id="tab-plan" class="tab-body" role="tabpanel" hidden>
+    <div class="day-tabs" id="day-tabs"></div>
+    <div class="day-head">
+      <input id="day-title" class="day-title" aria-label="일정 이름" maxlength="30">
+      <button id="day-delete" class="mini text danger" type="button">이 날 삭제</button>
+    </div>
+    <div class="modes small" role="radiogroup" aria-label="일정 이동 수단">
+      <label><input type="radio" name="plan-mode" value="TRANSIT" checked><span>🚇</span></label>
+      <label><input type="radio" name="plan-mode" value="WALKING"><span>🚶</span></label>
+      <label><input type="radio" name="plan-mode" value="DRIVING"><span>🚕</span></label>
+      <button id="plan-route-btn" class="chip pink" type="button">🗺️ 하루 동선 보기</button>
+    </div>
+    <ol id="day-list" class="day-list"></ol>
+    <p id="day-empty" class="empty-note">아직 일정이 없어요 🐾<br>장소를 검색해서 <b>📒 일정에 추가</b>를 눌러보세요!</p>
+    <div id="day-summary" class="day-summary"></div>
+    <div class="plan-tools">
+      <button id="export-btn" class="mini text" type="button">💾 내보내기</button>
+      <label class="mini text file-label">📂 불러오기<input id="import-input" type="file" accept="application/json,.json" hidden></label>
+      <button id="key-btn" class="mini text" type="button">🔑 API 키 변경</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- 일정 추가 다이얼로그 -->
+<dialog id="day-picker" class="dialog">
+  <form method="dialog">
+    <h3>어느 날에 넣을까요? 🗓️</h3>
+    <div id="day-picker-list" class="day-picker-list"></div>
+    <label class="memo-label">🕒 시간 (선택)<input id="add-time" type="time"></label>
+    <label class="memo-label">📝 메모 (선택)<input id="add-memo" maxlength="80" placeholder="예) 라멘 먹기!"></label>
+    <div class="dialog-actions">
+      <button value="cancel" class="mini text">취소</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- API 키 입력 -->
+<dialog id="key-dialog" class="dialog">
+  <form id="key-form" method="dialog">
+    <h3>🔑 Google Maps API 키</h3>
+    <p class="muted small">Google Cloud 콘솔에서 <b>Maps JavaScript API</b>, <b>Places API (New)</b>, <b>Routes API</b>를 켜고 만든 키를 넣어주세요. 키는 이 브라우저에만 저장돼요.</p>
+    <input id="key-input" placeholder="AIza..." autocomplete="off" spellcheck="false" required>
+    <div class="dialog-actions">
+      <button id="key-save" value="save" class="big-btn">지도 열기 🗼</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
